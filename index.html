@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>ZenFlow</title>
+</head>
+<body>
+  <h1>ZenFlow Pomodoro</h1>
+
+  <div>
+    <label for="mode-select">Mode:</label>
+    <select id="mode-select">
+      <option value="focus">Focus</option>
+      <option value="short-break">Short Break</option>
+      <option value="long-break">Long Break</option>
+    </select>
+  </div>
+
+  <div>
+    <label for="focus-input">Focus minutes:</label>
+    <input id="focus-input" type="number" min="1" value="25" style="width: 3rem;" />
+  </div>
+
+  <div>
+    <label for="short-break-input">Short break minutes:</label>
+    <input id="short-break-input" type="number" min="1" value="5" style="width: 3rem;" />
+  </div>
+
+  <div>
+    <label for="long-break-input">Long break minutes:</label>
+    <input id="long-break-input" type="number" min="1" value="15" style="width: 3rem;" />
+  </div>
+
+  <div>
+    <label for="cycles-input">Pomodoros before long break:</label>
+    <input id="cycles-input" type="number" min="1" value="4" style="width: 3rem;" />
+  </div>
+
+  <div style="margin-top: 1rem;">
+    <p id="mode-display" style="margin: 0; font-size: 1.25rem; font-weight: bold;">Mode: Focus</p>
+    <p id="timer-display" style="font-size: 2rem; font-weight: bold; margin: 0.25rem 0;">25:00</p>
+    <button id="start-button">Start</button>
+    <button id="stop-button">Stop</button>
+    <button id="reset-button">Reset</button>
+  </div>
+
+  <script src="timer.js"></script>
+</body>
+</html>
