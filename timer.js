@@ -1,14 +1,23 @@
 const display = document.getElementById("timer-display");
-const modeDisplay = document.getElementById("mode-display");
-const modeSelect = document.getElementById("mode-select");
-const startButton = document.getElementById("start-button");
-const stopButton = document.getElementById("stop-button");
+const timerIcon = document.getElementById("timer-icon");
+const toggleButton = document.getElementById("toggle-button");
 const resetButton = document.getElementById("reset-button");
 const focusInput = document.getElementById("focus-input");
 const shortBreakInput = document.getElementById("short-break-input");
 const longBreakInput = document.getElementById("long-break-input");
 const cyclesInput = document.getElementById("cycles-input");
+const focusModeButton = document.getElementById("focus-mode");
+const shortBreakModeButton = document.getElementById("short-break-mode");
+const longBreakModeButton = document.getElementById("long-break-mode");
+const settingsToggle = document.getElementById("settings-toggle");
+const settingsPanel = document.getElementById("settings-panel");
+const settingsCloseButton = document.getElementById("settings-close-button");
+const complimentaryToggle = document.getElementById("complimentary-toggle");
+const backgroundOptionButtons = document.querySelectorAll(".background-option");
+const backgroundColorInput = document.getElementById("background-color-input");
+const title = document.querySelector("h1");
 
+let selectedBackgroundImage = "1.png";
 let mode = "focus";
 let countdown = 25 * 60;
 let intervalId = null;
@@ -20,12 +29,72 @@ function formatTime(seconds) {
   return `${minutes}:${secs.toString().padStart(2, "0")}`;
 }
 
+function getModeIcon() {
+  if (mode === "short-break") return "☕";
+  if (mode === "long-break") return "🛌";
+  return "💻";
+}
+
+function getComplementaryColor(hex) {
+  if (!hex.startsWith("#") || (hex.length !== 7 && hex.length !== 4)) {
+    return "#000000";
+  }
+
+  let normalized = hex.slice(1);
+  if (normalized.length === 3) {
+    normalized = normalized.split("").map((char) => char + char).join("");
+  }
+
+  const r = 255 - parseInt(normalized.slice(0, 2), 16);
+  const g = 255 - parseInt(normalized.slice(2, 4), 16);
+  const b = 255 - parseInt(normalized.slice(4, 6), 16);
+
+  return `#${r.toString(16).padStart(2, "0")}${g.toString(16).padStart(2, "0")}${b.toString(16).padStart(2, "0")}`;
+}
+
+function updateModeButtons() {
+  focusModeButton.classList.toggle("active", mode === "focus");
+  shortBreakModeButton.classList.toggle("active", mode === "short-break");
+  longBreakModeButton.classList.toggle("active", mode === "long-break");
+}
+
 function updateDisplay() {
   display.textContent = formatTime(countdown);
-  let label = "Focus";
-  if (mode === "short-break") label = "Short Break";
-  if (mode === "long-break") label = "Long Break";
-  modeDisplay.textContent = `Mode: ${label}`;
+  timerIcon.textContent = getModeIcon();
+  updateModeButtons();
+}
+
+function applyBackgroundColor(color) {
+  document.body.style.backgroundColor = color;
+  const useComplementary = complimentaryToggle.checked;
+
+  if (useComplementary) {
+    const complementary = getComplementaryColor(color);
+    title.style.color = complementary;
+    display.style.color = complementary;
+    timerIcon.style.color = complementary;
+  } else {
+    title.style.color = "";
+    display.style.color = "";
+    timerIcon.style.color = "";
+  }
+}
+
+function updateBackgroundSelection() {
+  backgroundOptionButtons.forEach((button) => {
+    const isActive = button.dataset.bg === selectedBackgroundImage;
+    button.classList.toggle("active", isActive);
+    button.setAttribute("aria-pressed", isActive ? "true" : "false");
+  });
+}
+
+function applyBackgroundImageSetting() {
+  if (selectedBackgroundImage === "none") {
+    document.body.style.backgroundImage = "none";
+  } else {
+    document.body.style.backgroundImage = `url("images/${selectedBackgroundImage}")`;
+  }
+  updateBackgroundSelection();
 }
 
 function playBeep(repeat = 3) {
@@ -100,7 +169,6 @@ function resetTimer() {
 
 function setMode(newMode) {
   mode = newMode;
-  modeSelect.value = newMode;
   countdown = getCurrentModeSeconds();
   updateDisplay();
 }
@@ -127,6 +195,7 @@ function startTimer() {
   if (countdown <= 0) {
     countdown = getCurrentModeSeconds();
   }
+  updateDisplay();
   intervalId = setInterval(() => {
     if (countdown > 0) {
       countdown -= 1;
@@ -135,6 +204,7 @@ function startTimer() {
       switchMode();
     }
   }, 1000);
+  toggleButton.textContent = "Stop";
 }
 
 function stopTimer() {
@@ -142,14 +212,30 @@ function stopTimer() {
     clearInterval(intervalId);
     intervalId = null;
   }
+  toggleButton.textContent = "Start";
 }
 
-startButton.addEventListener("click", startTimer);
-stopButton.addEventListener("click", stopTimer);
+function toggleTimer() {
+  if (intervalId === null) {
+    startTimer();
+  } else {
+    stopTimer();
+  }
+}
+
+toggleButton.addEventListener("click", toggleTimer);
 resetButton.addEventListener("click", resetTimer);
 
-modeSelect.addEventListener("change", () => {
-  setMode(modeSelect.value);
+focusModeButton.addEventListener("click", () => {
+  setMode("focus");
+});
+
+shortBreakModeButton.addEventListener("click", () => {
+  setMode("short-break");
+});
+
+longBreakModeButton.addEventListener("click", () => {
+  setMode("long-break");
 });
 
 focusInput.addEventListener("change", () => {
@@ -179,4 +265,49 @@ cyclesInput.addEventListener("change", () => {
   }
 });
 
+const applyColorValue = () => {
+  applyBackgroundColor(backgroundColorInput.value);
+};
+
+backgroundOptionButtons.forEach((button) => {
+  button.addEventListener("click", () => {
+    selectedBackgroundImage = button.dataset.bg;
+    applyBackgroundImageSetting();
+  });
+});
+
+backgroundColorInput.addEventListener("input", applyColorValue);
+backgroundColorInput.addEventListener("change", applyColorValue);
+
+function openSettingsPanel() {
+  settingsPanel.classList.add("open");
+  settingsToggle.setAttribute("aria-expanded", "true");
+  settingsPanel.setAttribute("aria-hidden", "false");
+}
+
+function closeSettingsPanel() {
+  settingsPanel.classList.remove("open");
+  settingsToggle.setAttribute("aria-expanded", "false");
+  settingsPanel.setAttribute("aria-hidden", "true");
+}
+
+function toggleSettingsPanel() {
+  if (settingsPanel.classList.contains("open")) {
+    closeSettingsPanel();
+  } else {
+    openSettingsPanel();
+  }
+}
+
+settingsToggle.addEventListener("click", toggleSettingsPanel);
+settingsCloseButton.addEventListener("click", closeSettingsPanel);
+
+document.addEventListener("keydown", (event) => {
+  if (event.key === "Escape" && settingsPanel.classList.contains("open")) {
+    closeSettingsPanel();
+  }
+});
+
+applyBackgroundImageSetting();
+applyColorValue();
 resetTimer();
