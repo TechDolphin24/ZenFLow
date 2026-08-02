@@ -17,12 +17,13 @@ const soundSelectionLabel = document.getElementById("sound-selection-label");
 const soundVolumeSlider = document.getElementById("sound-volume");
 const settingsPanel = document.getElementById("settings-panel");
 const settingsCloseButton = document.getElementById("settings-close-button");
-const complimentaryToggle = document.getElementById("complimentary-toggle");
 const backgroundPrevButton = document.getElementById("background-prev");
 const backgroundNextButton = document.getElementById("background-next");
 const backgroundSelectionLabel = document.getElementById("background-selection-label");
 const backgroundPreview = document.getElementById("background-preview");
+const backgroundImageToggle = document.getElementById("background-image-toggle");
 const backgroundColorInput = document.getElementById("background-color-input");
+const textColorInput = document.getElementById("text-color-input");
 const title = document.querySelector("h1");
 
 let selectedBackgroundImage = "1.png";
@@ -36,8 +37,37 @@ const backgroundOptions = [
   { value: "1.png", label: "🎧 Study Room" },
   { value: "2.png", label: "🌿 Cozy nook" },
   { value: "3.png", label: "🌅 Sunlit Haven" },
-  { value: "none", label: "Off ❌" },
 ];
+
+// preload availability map for backgrounds
+const backgroundAvailable = {};
+
+function preloadBackgrounds() {
+  backgroundOptions.forEach((opt) => {
+    const img = new Image();
+    img.onload = () => {
+      backgroundAvailable[opt.value] = true;
+      console.log("Preloaded background OK:", opt.value);
+    };
+    img.onerror = () => {
+      backgroundAvailable[opt.value] = false;
+      console.warn("Background failed to load:", opt.value);
+    };
+    img.src = `images/${opt.value}`;
+  });
+}
+
+function ensureValidSelectedBackground() {
+  if (backgroundAvailable[selectedBackgroundImage]) return;
+  // find first available
+  for (const opt of backgroundOptions) {
+    if (backgroundAvailable[opt.value]) {
+      selectedBackgroundImage = opt.value;
+      return;
+    }
+  }
+  // fallback: keep current value
+}
 
 function getBackgroundOptionIndex(value) {
   return backgroundOptions.findIndex((option) => option.value === value);
@@ -49,21 +79,32 @@ function updateBackgroundSelectionLabel() {
     backgroundSelectionLabel.textContent = option ? option.label : "Unknown";
   }
   if (backgroundPreview) {
-    if (selectedBackgroundImage === "none") {
-      backgroundPreview.style.display = "none";
-      backgroundPreview.alt = "No background selected";
-    } else {
-      backgroundPreview.style.display = "block";
-      backgroundPreview.src = `images/${selectedBackgroundImage}`;
-      backgroundPreview.alt = option ? option.label : "Background preview";
-    }
+    backgroundPreview.style.display = "block";
+    backgroundPreview.src = `images/${selectedBackgroundImage}`;
+    backgroundPreview.alt = option ? option.label : "Background preview";
+    console.log("Preview set to:", backgroundPreview.src);
   }
 }
 
 function selectBackgroundByIndex(index) {
-  const wrappedIndex = (index + backgroundOptions.length) % backgroundOptions.length;
-  selectedBackgroundImage = backgroundOptions[wrappedIndex].value;
+  let wrappedIndex = (index + backgroundOptions.length) % backgroundOptions.length;
+  const start = wrappedIndex;
+  // find next available background, avoid infinite loop
+  while (true) {
+    const candidate = backgroundOptions[wrappedIndex].value;
+    if (backgroundAvailable[candidate] !== false) {
+      selectedBackgroundImage = candidate;
+      break;
+    }
+    wrappedIndex = (wrappedIndex + 1) % backgroundOptions.length;
+    if (wrappedIndex === start) {
+      // none available, pick first
+      selectedBackgroundImage = backgroundOptions[0].value;
+      break;
+    }
+  }
   applyBackgroundImageSetting();
+  console.log("Selected background after navigation:", selectedBackgroundImage);
 }
 
 function handleBackgroundPrev() {
@@ -245,12 +286,42 @@ function updateDisplay() {
 }
 
 function applyBackgroundImageSetting() {
-  if (selectedBackgroundImage === "none") {
-    document.body.style.backgroundImage = "none";
+  applyTheme();
+}
+
+function applyTheme() {
+  const useImage = backgroundImageToggle ? backgroundImageToggle.checked : true;
+
+  if (useImage) {
+    document.body.style.backgroundImage = selectedBackgroundImage ? `url("images/${selectedBackgroundImage}")` : "none";
+    // keep background color transparent/default when using image
+    // set default text color when enabling image
+    if (textColorInput) {
+      textColorInput.value = textColorInput.value || "#334155";
+      title.style.color = textColorInput.value;
+      display.style.color = textColorInput.value;
+      timerIcon.style.color = textColorInput.value;
+    }
   } else {
-    document.body.style.backgroundImage = `url("images/${selectedBackgroundImage}")`;
+    document.body.style.backgroundImage = "none";
+    if (backgroundColorInput) {
+      document.body.style.backgroundColor = backgroundColorInput.value;
+    }
+    if (textColorInput) {
+      title.style.color = textColorInput.value;
+      display.style.color = textColorInput.value;
+      timerIcon.style.color = textColorInput.value;
+    }
   }
   updateBackgroundSelectionLabel();
+  // show/hide UI
+  const bgColorRow = document.getElementById("background-color-row");
+  const counterControls = document.querySelector(".background-counter-controls");
+  if (bgColorRow) bgColorRow.style.display = useImage ? "none" : "block";
+  if (counterControls) counterControls.style.display = useImage ? "flex" : "none";
+  const selectionLabel = document.getElementById("background-selection-label");
+  if (selectionLabel) selectionLabel.style.display = useImage ? "block" : "none";
+
 }
 
 function playBeep(repeat = 3) {
@@ -488,7 +559,7 @@ cyclesInput.addEventListener("change", () => {
 });
 
 const applyColorValue = () => {
-  document.body.style.backgroundColor = backgroundColorInput.value;
+  applyTheme();
 };
 
 if (backgroundPrevButton) {
@@ -498,8 +569,30 @@ if (backgroundNextButton) {
   backgroundNextButton.addEventListener("click", handleBackgroundNext);
 }
 
-backgroundColorInput.addEventListener("input", applyColorValue);
-backgroundColorInput.addEventListener("change", applyColorValue);
+if (backgroundColorInput) {
+  backgroundColorInput.addEventListener("input", applyColorValue);
+  backgroundColorInput.addEventListener("change", applyColorValue);
+}
+
+if (backgroundImageToggle) {
+  backgroundImageToggle.addEventListener("change", (e) => {
+    const enabled = e.target.checked;
+    // apply defaults per requirements
+    if (!enabled) {
+      if (backgroundColorInput) backgroundColorInput.value = "#FFDAB9"; // pastel orange
+      if (textColorInput) textColorInput.value = "#5A3E2B"; // dark brown
+    } else {
+      if (textColorInput) textColorInput.value = "#334155"; // dark gray
+    }
+    applyTheme();
+  });
+}
+
+if (textColorInput) {
+  textColorInput.addEventListener("input", () => {
+    applyTheme();
+  });
+}
 
 function openSettingsPanel() {
   closeSoundPanel();
@@ -568,7 +661,12 @@ document.addEventListener("keydown", (event) => {
   }
 });
 
-applyBackgroundImageSetting();updateBackgroundSelectionLabel();applyColorValue();
+// preload backgrounds and initialize selection
+preloadBackgrounds();
+ensureValidSelectedBackground();
+applyBackgroundImageSetting();
+updateBackgroundSelectionLabel();
+applyColorValue();
 if (soundVolumeSlider) {
   soundVolumeSlider.value = "0";
   handleVolumeChange();

@@ -30,23 +30,28 @@
       <input id="cycles-input" type="number" min="1" value="4" />
     </div>
     <div class="settings-row">
-      <label for="complimentary-toggle">Use complementary text color:</label>
-      <input id="complimentary-toggle" type="checkbox" checked />
-    </div>
-    <div class="settings-row">
-      <label>Background image:</label>
+      <div class="background-toggle-row">
+        <input id="background-image-toggle" type="checkbox" checked aria-label="Use background image" />
+        <label for="background-image-toggle">Background image</label>
+      </div>
       <div class="background-counter">
-        <button id="background-prev" type="button" aria-label="Previous background">◀</button>
         <div class="background-selection">
+          <div class="background-counter-controls">
+            <button id="background-prev" type="button" aria-label="Previous background">◀</button>
+            <img id="background-preview" class="background-preview" src="images/1.png" alt="Selected background preview" />
+            <button id="background-next" type="button" aria-label="Next background">▶</button>
+          </div>
           <span id="background-selection-label">� Study Room</span>
-          <img id="background-preview" class="background-preview" src="images/1.png" alt="Selected background preview" />
         </div>
-        <button id="background-next" type="button" aria-label="Next background">▶</button>
       </div>
     </div>
-    <div class="settings-row">
+    <div class="settings-row" id="background-color-row" style="display:none">
       <label for="background-color-input">Background color:</label>
       <input id="background-color-input" type="color" value="#ffffff" />
+    </div>
+    <div class="settings-row">
+      <label for="text-color-input">Text color:</label>
+      <input id="text-color-input" type="color" value="#334155" />
     </div>
   </div>
 
