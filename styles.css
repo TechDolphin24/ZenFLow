@@ -6,7 +6,7 @@ body {
   min-height: 100vh;
   margin: 0;
   font-family: Arial, Helvetica, sans-serif;
-  background-image: url("images/1.png");
+  background-image: none;
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
@@ -82,11 +82,46 @@ h1 {
   border-color: #4338ca;
 }
 
+#timer-actions {
+  margin-top: 1rem;
+  display: flex;
+  justify-content: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+#timer-actions button {
+  flex: 1 1 110px;
+  min-width: 110px;
+  max-width: 140px;
+  padding: 10px 12px;
+  font-size: 0.9rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.25rem;
+}
+
+#timer-actions button .button-emoji {
+  font-size: 1.2rem;
+  line-height: 1;
+}
+
+#timer-actions button .button-label {
+  font-size: 0.9rem;}
+
 button {
   min-width: 100px;
   padding: 14px 18px;
   margin: 6px;
   font-size: 1rem;
+}
+
+#settings-toggle,
+#sound-toggle {
+  min-width: 0;
+  margin: 0;
+  padding: 0;
 }
 
 #settings-toggle {
@@ -108,11 +143,157 @@ button {
   justify-content: center;
 }
 
+#sound-toggle {
+  position: fixed;
+  right: 88px;
+  bottom: 20px;
+  width: 40px;
+  height: 40px;
+  border: none;
+  border-radius: 50%;
+  background: transparent;
+  color: #4338ca;
+  font-size: 1.35rem;
+  box-shadow: none;
+  cursor: pointer;
+  z-index: 20;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.sound-panel {
+  position: fixed;
+  right: 20px;
+  bottom: 72px;
+  display: none;
+  width: min(320px, calc(100vw - 32px));
+  max-width: 320px;
+  padding: 12px 14px 14px;
+  background: rgba(255, 255, 255, 0.96);
+  border-radius: 18px;
+  border: 1px solid rgba(148, 163, 184, 0.28);
+  box-shadow: 0 18px 40px rgba(15, 23, 42, 0.15);
+  z-index: 30;
+  box-sizing: border-box;
+}
+
+.sound-panel.open {
+  display: block;
+}
+
+.sound-header {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.5rem;
+  margin-bottom: 0.5rem;
+  font-weight: 600;
+  color: #334155;
+}
+
+.sound-header button {
+  border: none;
+  background: rgba(15, 23, 42, 0.05);
+  color: #64748b;
+  font-size: 0.95rem;
+  padding: 4px 6px;
+  border-radius: 10px;
+  cursor: pointer;
+  min-width: 0;
+  margin: 0;
+}
+
+.sound-panel button {
+  margin: 0;
+}
+
+.sound-option-grid {
+  display: grid;
+  gap: 1rem;
+}
+
+.sound-option-entry {
+  display: grid;
+  gap: 0.5rem;
+  width: 100%;
+  padding: 0 2px;
+  box-sizing: border-box;
+}
+
+.sound-volume-slider {
+  display: block;
+  width: calc(100% - 28px);
+  max-width: calc(100% - 28px);
+  margin: 0 14px;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+.sound-counter {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.sound-counter button {
+  min-width: 0;
+  width: 38px;
+  height: 38px;
+  border: none;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(67, 56, 202, 0.08);
+  color: #4338ca;
+  font-size: 1rem;
+  cursor: pointer;
+  padding: 0;
+}
+
+.sound-counter button:hover {
+  background: rgba(67, 56, 202, 0.16);
+}
+
+#sound-selection-label {
+  flex: 1;
+  text-align: center;
+  font-weight: 700;
+  color: #334155;
+}
+.sound-option-label {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: #334155;
+}
+
+.sound-volume-slider {
+  width: 100%;
+  max-width: 100%;
+  accent-color: #4338ca;
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+.sound-volume-label {
+  font-size: 0.9rem;
+  color: #334155;
+  white-space: nowrap;
+}
+
+#sound-volume {
+  flex: 1;
+}
+
 #settings-panel {
   position: fixed;
   right: 20px;
-  bottom: 90px;
+  bottom: 60px;
   width: min(320px, calc(100vw - 40px));
+  max-height: 82vh;
   background: #ffffff;
   border-radius: 18px;
   box-shadow: 0 18px 40px rgba(15, 23, 42, 0.2);
@@ -171,50 +352,55 @@ button {
   font-size: 0.95rem;
 }
 
-.background-option-grid {
-  display: grid;
-  grid-template-columns: repeat(3, 48px);
-  gap: 2.5rem;
-  justify-content: center;
+.background-counter {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
 }
 
-.background-option {
-  border: 1px solid #cbd5e1;
-  border-radius: 10px;
-  background: #f8fafc;
-  color: #334155;
-  padding: 0.12rem;
+.background-counter button {
+  width: 30px !important;
+  height: 30px !important;
+  min-width: 30px;
+  min-height: 30px;
+  border: none;
+  border-radius: 9999px;
   display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(67, 56, 202, 0.08);
+  color: #4338ca;
+  font-size: 0.9rem;
+  line-height: 1;
+  padding: 0;
+  cursor: pointer;
+}
+
+.background-counter button:hover {
+  background: rgba(67, 56, 202, 0.16);
+}
+
+.background-selection {
+  display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 0.15rem;
-  cursor: pointer;
-  width: 48px;
-  min-height: 56px;
+  gap: 0.4rem;
+  flex: 1;
+}
+
+#background-selection-label {
   text-align: center;
-  overflow: hidden;
+  font-weight: 700;
+  color: #334155;
 }
 
-.background-option img {
-  width: 100%;
-  height: 32px;
+.background-preview {
+  width: 100px;
+  height: 64px;
   object-fit: cover;
-  border-radius: 4px;
-}
-
-.background-option span {
-  font-size: 0.65rem;
-  line-height: 1.1;
-}
-
-.background-option.active {
-  border-color: #4338ca;
-  background: #4338ca;
-  color: #ffffff;
-}
-
-.background-option.active span {
-  color: #ffffff;
+  border-radius: 14px;
+  border: 1px solid rgba(148, 163, 184, 0.3);
 }
 
 input[type="number"] {

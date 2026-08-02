@@ -35,18 +35,13 @@
     </div>
     <div class="settings-row">
       <label>Background image:</label>
-      <div class="background-option-grid">
-        <button type="button" class="background-option active" data-bg="1.png" aria-pressed="true">
-          <img src="images/1.png" alt="Sunlit haven background" />
-          <span>Sunlit haven</span>
-        </button>
-        <button type="button" class="background-option" data-bg="2.png" aria-pressed="false">
-          <img src="images/2.png" alt="Cozy nook background" />
-          <span>Cozy nook</span>
-        </button>
-        <button type="button" class="background-option" data-bg="none" aria-pressed="false">
-          <span>Off</span>
-        </button>
+      <div class="background-counter">
+        <button id="background-prev" type="button" aria-label="Previous background">◀</button>
+        <div class="background-selection">
+          <span id="background-selection-label">� Study Room</span>
+          <img id="background-preview" class="background-preview" src="images/1.png" alt="Selected background preview" />
+        </div>
+        <button id="background-next" type="button" aria-label="Next background">▶</button>
       </div>
     </div>
     <div class="settings-row">
@@ -56,25 +51,41 @@
   </div>
 
   <div id="main-content">
-    <div id="mode-buttons">
-    <button id="focus-mode" type="button">Focus</button>
-    <button id="short-break-mode" type="button">Short Break</button>
-    <button id="long-break-mode" type="button">Long Break</button>
-  </div>
-
-  <div id="timer-container">
-    <div id="timer-main">
-      <h2 id="timer-display">25:00</h2>
-      <div id="timer-icon">💻</div>
+    <div id="timer-container">
+      <div id="timer-main">
+        <h2 id="timer-display">25:00</h2>
+        <div id="timer-icon">💻</div>
+      </div>
+      <div id="timer-actions">
+        <button id="focus-button" type="button">Start Focus</button>
+        <button id="short-break-button" type="button">Short Break</button>
+        <button id="long-break-button" type="button">Long Break</button>
+      </div>
     </div>
-    <div id="timer-actions">
-      <button id="toggle-button" type="button">Start</button>
-      <button id="reset-button" type="button">Reset</button>
-    </div>
-  </div>
   </div>
 
   <button id="settings-toggle" type="button" aria-label="Open settings">⚙️</button>
+  <button id="sound-toggle" type="button" aria-label="Open sound options">🎵</button>
+
+  <div id="sound-panel" class="sound-panel" aria-hidden="true">
+    <div class="sound-header">
+      <button id="sound-close-button" type="button" aria-label="Close sound options">✕</button>
+    </div>
+    <div class="sound-option-grid">
+      <div class="sound-option-entry">
+        <div class="sound-option-label">Sound</div>
+        <div class="sound-counter">
+          <button id="sound-prev" type="button" aria-label="Previous sound">◀</button>
+          <span id="sound-selection-label">🌊 Ocean</span>
+          <button id="sound-next" type="button" aria-label="Next sound">▶</button>
+        </div>
+      </div>
+      <div class="sound-option-entry">
+        <div class="sound-option-label">Volume</div>
+        <input id="sound-volume" class="sound-volume-slider" type="range" min="0" max="100" value="0" />
+      </div>
+    </div>
+  </div>
 
   <script src="timer.js"></script>
 </body>
