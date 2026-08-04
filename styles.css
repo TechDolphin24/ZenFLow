@@ -13,8 +13,18 @@ body {
 }
 
 h1 {
-  text-align: center;
-  margin: 1.5rem 0 0.5rem;
+  position: fixed;
+  bottom: 1rem;
+  left: 1rem;
+  margin: 0;
+  font-family: 'Old Standard TT', serif;
+  font-size: 2rem;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  text-align: left;
+  color: white;
+  z-index: 10;
 }
 
 #main-content {
@@ -22,9 +32,21 @@ h1 {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  min-height: calc(100vh - 220px);
+  min-height: calc(100vh - 260px);
   width: 100%;
-  padding: 0 1rem 1rem;
+  padding: 2rem 1rem 1rem;
+}
+
+.quote-text {
+  width: min(100%, 760px);
+  margin: 1rem auto;
+  padding: 0 1rem;
+  font-size: 1.15rem;
+  font-style: italic;
+  font-weight: 600;
+  color: #334155;
+  text-align: center;
+  line-height: 1.5;
 }
 
 #timer-container {

@@ -39,6 +39,28 @@ const backgroundOptions = [
   { value: "3.png", label: "🌅 Sunlit Haven" },
 ];
 
+let quotes = [];
+let lastQuoteIndex = -1;
+
+function loadQuotes() {
+  return fetch("quotes.json")
+    .then((response) => {
+      if (!response.ok) {
+        throw new Error(`Failed to load quotes: ${response.status}`);
+      }
+      return response.json();
+    })
+    .then((data) => {
+      quotes = Array.isArray(data)
+        ? data.filter((item) => item && item.quote && item.author)
+        : [];
+    })
+    .catch((error) => {
+      console.warn(error);
+      quotes = [];
+    });
+}
+
 // preload availability map for backgrounds
 const backgroundAvailable = {};
 
@@ -55,6 +77,27 @@ function preloadBackgrounds() {
     };
     img.src = `images/${opt.value}`;
   });
+}
+
+function displayRandomQuote() {
+  const quoteText = document.getElementById("quote-text");
+  if (!quoteText) return;
+  if (quotes.length === 0) {
+    console.error("Quotes failed to load or no quotes available.");
+    quoteText.textContent = "";
+    return;
+  }
+  let randomIndex;
+  if (quotes.length === 1) {
+    randomIndex = 0;
+  } else {
+    do {
+      randomIndex = Math.floor(Math.random() * quotes.length);
+    } while (randomIndex === lastQuoteIndex);
+  }
+  lastQuoteIndex = randomIndex;
+  const selectedQuote = quotes[randomIndex];
+  quoteText.textContent = `${selectedQuote.quote} - ${selectedQuote.author}`;
 }
 
 function ensureValidSelectedBackground() {
@@ -129,23 +172,6 @@ function getModeIcon() {
   return "🧘";
 }
 
-function getComplementaryColor(hex) {
-  if (!hex.startsWith("#") || (hex.length !== 7 && hex.length !== 4)) {
-    return "#000000";
-  }
-
-  let normalized = hex.slice(1);
-  if (normalized.length === 3) {
-    normalized = normalized.split("").map((char) => char + char).join("");
-  }
-
-  const r = 255 - parseInt(normalized.slice(0, 2), 16);
-  const g = 255 - parseInt(normalized.slice(2, 4), 16);
-  const b = 255 - parseInt(normalized.slice(4, 6), 16);
-
-  return `#${r.toString(16).padStart(2, "0")}${g.toString(16).padStart(2, "0")}${b.toString(16).padStart(2, "0")}`;
-}
-
 function getModeLabel(modeKey) {
   if (modeKey === "short-break") return "Short Break";
   if (modeKey === "long-break") return "Long Break";
@@ -157,7 +183,6 @@ function getNextModeOptions() {
   if (mode === "short-break") return ["long-break", "focus"];
   return ["focus", "short-break"];
 }
-
 function getModeEmoji(modeKey) {
   if (modeKey === "short-break") return "☕";
   if (modeKey === "long-break") return "🛌";
@@ -298,19 +323,29 @@ function applyTheme() {
     // set default text color when enabling image
     if (textColorInput) {
       textColorInput.value = textColorInput.value || "#334155";
-      title.style.color = textColorInput.value;
+      title.style.color = "white";
       display.style.color = textColorInput.value;
       timerIcon.style.color = textColorInput.value;
+      const quoteText = document.getElementById("quote-text");
+      if (quoteText) quoteText.style.color = textColorInput.value;
     }
   } else {
     document.body.style.backgroundImage = "none";
     if (backgroundColorInput) {
+      const bgColor = backgroundColorInput.value.toLowerCase();
       document.body.style.backgroundColor = backgroundColorInput.value;
+      if (bgColor === "#ffffff" || bgColor === "#fff") {
+        title.style.color = "black";
+      }
     }
     if (textColorInput) {
-      title.style.color = textColorInput.value;
+      if (document.body.style.backgroundColor.toLowerCase() !== "#ffffff" && document.body.style.backgroundColor.toLowerCase() !== "rgb(255, 255, 255)") {
+        title.style.color = "white";
+      }
       display.style.color = textColorInput.value;
       timerIcon.style.color = textColorInput.value;
+      const quoteText = document.getElementById("quote-text");
+      if (quoteText) quoteText.style.color = textColorInput.value;
     }
   }
   updateBackgroundSelectionLabel();
@@ -662,11 +697,12 @@ document.addEventListener("keydown", (event) => {
 });
 
 // preload backgrounds and initialize selection
-preloadBackgrounds();
-ensureValidSelectedBackground();
+  preloadBackgrounds();
+  ensureValidSelectedBackground();
 applyBackgroundImageSetting();
 updateBackgroundSelectionLabel();
 applyColorValue();
+loadQuotes().then(displayRandomQuote);
 if (soundVolumeSlider) {
   soundVolumeSlider.value = "0";
   handleVolumeChange();
